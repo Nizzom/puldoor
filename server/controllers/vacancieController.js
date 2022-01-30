@@ -1,6 +1,6 @@
-const router = require("express").Router();
 const Vacancie = require("../../models/Vacancie");
-const { check, validationResult } = require("express-validator");
+const User = require("../../models/User");
+const { validationResult } = require("express-validator");
 
 //Vacancie
 exports.getAll = async (req, res) => {
@@ -10,78 +10,99 @@ exports.getAll = async (req, res) => {
       categorie,
       city,
       status: { $ne: 0 },
+      active: true,
     }).sort({ status: 1 });
     res.status(200).json(vacancies);
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
-}
+};
 
-exports.getOne =  async (req, res) => {
+exports.getOne = async (req, res) => {
   try {
     const { id } = req.params;
-    const vacancie = await Vacancie.findById({ id });
+    const vacancie = await Vacancie.findById(id);
+    res.status(200).json(vacancie);
+  } catch (err) {
+    console.log(req.originalUrl, "\n", err);
+    res.status(500).json(err);
+  }
+};
+
+exports.add = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+        message: "Noto'g'ri Malumotlar",
+      });
+    }
+    const { id } = req.body;
+    const can = await User.findById(id);
+    if (!can) {
+      return res.status(400).json({
+        message: "User topilmadi!!",
+      });
+    }
+    const vacancie = new Vacancie({
+      ...req.body,
+      user: can._id,
+      city: can.city,
+      imgUrl: can.imgUrl,
+      companyName: can.companyName,
+    });
+    await vacancie.save();
     res.status(200).json(vacancie);
   } catch (err) {
     res.status(500).json(err);
+    console.log(req.originalUrl, "\n", err);
   }
-}
+};
 
-exports.add = async (req, res) => {
-    try {
-      const errors = validationResult(req);
-
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          errors: errors.array(),
-          message: "Noto'g'ri Malumotlar",
-        });
-      }
-      const vacancie = new Vacancie({ ...req.body });
-      await vacancie.save();
-      res.status(200).json({ id: vacancie._id });
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  }
-
-router.put("/update", async (req, res) => {
+exports.update = async (req, res) => {
   try {
-    const { id, status } = req.body;
-    const vacancie = await Vacancie.findById({ id });
-    await vacancie.set({
-      status,
+    const { id } = req.params;
+    const vacancie = await Vacancie.findById(id);
+    vacancie.set({
+      ...req.body,
     });
-    res.status(200).json({ id });
+    await vacancie.save();
+    res.status(200).json(vacancie);
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
-});
+};
 
-router.post("/my/all", async (req, res) => {
+exports.myAll = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     const vacancies = await Vacancie.find({
       user: id,
       status: { $ne: 0 },
     }).sort({ status: 1 });
     res.status(200).json(vacancies);
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
-});
+};
 
-router.post("/my/single", async (req, res) => {
+exports.mySingle = async (req, res) => {
   try {
-    const { id } = req.body;
-    const vacancies = await Vacancie.findById({ id });
-    res.status(200).json(vacancies);
+    const { id } = req.params;
+    const vacancie = await Vacancie.findById(id);
+    res.status(200).json(vacancie);
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
-});
+};
 
-router.post("/search", async (req, res) => {
+exports.search = async (req, res) => {
   try {
     const { categorie, city, text } = req.body;
     const vacancies = await Vacancie.find({
@@ -89,32 +110,39 @@ router.post("/search", async (req, res) => {
       categorie,
       city,
       status: { $ne: 0 },
+      active: true,
     }).sort({ status: 1 });
     res.status(200).json(vacancies);
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
-});
-router.post("/web/search", async (req, res) => {
+};
+
+exports.webSearch = async (req, res) => {
   try {
     const { text } = req.body;
     const vacancies = await Vacancie.find({
       $text: { $search: text },
       status: { $ne: 0 },
+      active: true,
     }).sort({ status: 1 });
     res.status(200).json(vacancies);
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
-});
-router.get("/web/all", async (req, res) => {
+};
+
+exports.webAll = async (req, res) => {
   try {
     const vacancies = await Vacancie.find({
       status: { $ne: 0 },
+      active: true,
     }).sort({ status: 1 });
     res.status(200).json(vacancies);
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
-});
-
+};

@@ -9,7 +9,7 @@ const schema = new Schema({
   city: { type: String, required: true },
   bornDate: { type: Date },
   type: { type: String },
-  categorie: { type: Number },
+  categorie: { type: String },
   companyName: { type: String },
   companyDesc: { type: String },
   code: {type: Number},

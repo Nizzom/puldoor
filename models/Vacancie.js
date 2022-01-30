@@ -5,12 +5,13 @@ const schema = new Schema({
   status: { type: Number, default: 0 },
   active: { type: Boolean, default: true },
   positionName: { type: String, required: true },
-  categorie: { type: Number, required: true },
+  categorie: { type: String, required: true },
   budget: { type: Number, required: true },
   desc: { type: String, required: true },
   city: { type: String },
   private: { type: String },
-  imgUrl: {type: String},
+  companyName: {type: String},
+  imgUrl: { type: String },
   user: { type: Schema.Types.ObjectId, ref: "User" },
 });
 schema.index({ "$**": "text" });

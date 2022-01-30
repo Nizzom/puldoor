@@ -34,6 +34,7 @@ app.use(cors());
 //Routes
 app.use("/api/user", require("./server/routes/user"));
 app.use("/api/vacancie", require("./server/routes/vacancie"));
+app.use("/api/response", require("./server/routes/response"));
 
 //Server starting function
 async function start() {

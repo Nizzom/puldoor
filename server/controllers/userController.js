@@ -20,9 +20,12 @@ exports.register = async (req, res) => {
       });
     }
     const user = new User({ ...req.body });
+    const code = Math.floor(1000 + Math.random() * 9000);
+    user.code = code;
     await user.save();
-    res.status(201).json({ id: user._id });
+    res.status(201).json({ id: user._id, code });
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
 };
@@ -41,7 +44,7 @@ exports.addImg = async (req, res) => {
 
     const extname = path.extname(img.name);
     img.mv(path.join(__dirname, "..", "..", `public/${id}${extname}`));
-    const imgUrl = `http://localhost:5000/${id}${extname}`;
+    const imgUrl = `https://puldoor.uz/${id}${extname}`;
     user.set({
       imgUrl: imgUrl,
     });
@@ -49,7 +52,7 @@ exports.addImg = async (req, res) => {
     await user.save();
     res.status(200).json({ message: "Yangilandi!", imgUrl });
   } catch (err) {
-    console.log(err);
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
 };
@@ -70,6 +73,7 @@ exports.update = async (req, res) => {
     await user.save();
     res.status(200).json({ message: "Yangilandi!" });
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
 };
@@ -94,9 +98,9 @@ exports.verify = async (req, res) => {
     const code = Math.floor(1000 + Math.random() * 9000);
     user.code = code;
     await user.save();
-    res.status(200).json({ message: "Kod yuborildi!", id: user._id });
+    res.status(200).json({ message: "Kod yuborildi!", id: user._id, code });
   } catch (err) {
-    console.log(err);
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
 };
@@ -118,6 +122,7 @@ exports.code = async (req, res) => {
     await user.save();
     res.status(200).json({ message: "User tastiqlandi!", user });
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
 };
@@ -138,6 +143,7 @@ exports.employer = async (req, res) => {
 
     res.status(200).json({ user });
   } catch (err) {
+    console.log(req.originalUrl, "\n", err);
     res.status(500).json(err);
   }
 };
